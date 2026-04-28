@@ -343,7 +343,9 @@
   document.getElementById('searchMsg').className = 'message';
 
   try {
-    const res = await fetch(`${API}/weather/fetch_weather?city=${encodeURIComponent(city)}`);
+    const res = await fetch(`${API}/weather/fetch_weather?city=${encodeURIComponent(city)}`, {
+    headers: { 'ngrok-skip-browser-warning': 'true' }
+    });
     const data = await res.json();
 
     if (!res.ok) {
