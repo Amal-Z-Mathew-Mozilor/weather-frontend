@@ -333,39 +333,58 @@
     el.className = `message ${type}`;
   }
 
-  async function fetchWeather() {
-    const city = document.getElementById('cityInput').value.trim();
-    if (!city) return showMsg('searchMsg', 'Please enter a city name.', 'error');
+ async function fetchWeather() {
+  const city = document.getElementById('cityInput').value.trim();
+  if (!city) return showMsg('searchMsg', 'Please enter a city name.', 'error');
 
-    document.getElementById('searchBtn').disabled = true;
-    document.getElementById('loading').classList.add('visible');
-    document.getElementById('weatherCard').classList.remove('visible');
-    document.getElementById('searchMsg').className = 'message';
+  document.getElementById('searchBtn').disabled = true;
+  document.getElementById('loading').classList.add('visible');
+  document.getElementById('weatherCard').classList.remove('visible');
+  document.getElementById('searchMsg').className = 'message';
 
-    try {
-      const res = await fetch(`${API}/weather/fetch_weather?city=${encodeURIComponent(city)}`);
-      const data = await res.json();
-      if (!res.ok) return showMsg('searchMsg', data.detail || 'City not found.', 'error');
+  try {
+    const res = await fetch(`${API}/weather/fetch_weather?city=${encodeURIComponent(city)}`);
+    const data = await res.json();
 
-      currentWeather = data;
-      document.getElementById('cityName').textContent = data.city;
-      document.getElementById('countryName').textContent = data.country;
-      document.getElementById('tempValue').textContent = data.temperature;
-      document.getElementById('feelsLike').textContent = `${data.feels_like}°`;
-      document.getElementById('humidity').textContent = `${data.humidity}%`;
-      document.getElementById('wind').textContent = `${data.wind ?? '—'} km/h`;
-      document.getElementById('weatherEmoji').textContent = getWeatherEmoji(data.temperature);
-      document.getElementById('saveBtn').disabled = false;
-      document.getElementById('saveMsg').className = 'message';
-      document.getElementById('weatherCard').classList.add('visible');
-    } catch (e) {
-      showMsg('searchMsg', 'Could not connect to server.', 'error');
-    } finally {
-      document.getElementById('searchBtn').disabled = false;
-      document.getElementById('loading').classList.remove('visible');
+    if (!res.ok) {
+      return showMsg('searchMsg', data.detail || 'City not found.', 'error');
     }
-  }
 
+    console.log(data);
+
+    currentWeather = data;
+
+    const ids = [
+      'cityName','countryName','tempValue',
+      'feelsLike','humidity','wind',
+      'weatherEmoji','saveBtn','saveMsg','weatherCard'
+    ];
+
+    ids.forEach(id => {
+      if (!document.getElementById(id)) {
+        throw new Error(`${id} not found`);
+      }
+    });
+
+    document.getElementById('cityName').textContent = data.city;
+    document.getElementById('countryName').textContent = data.country;
+    document.getElementById('tempValue').textContent = data.temperature;
+    document.getElementById('feelsLike').textContent = `${data.feels_like}°`;
+    document.getElementById('humidity').textContent = `${data.humidity}%`;
+    document.getElementById('wind').textContent = `${data.wind ?? '—'} km/h`;
+    document.getElementById('weatherEmoji').textContent = getWeatherEmoji(data.temperature);
+    document.getElementById('saveBtn').disabled = false;
+    document.getElementById('saveMsg').className = 'message';
+    document.getElementById('weatherCard').classList.add('visible');
+
+  } catch (e) {
+    console.error(e);
+    showMsg('searchMsg', e.message, 'error');
+  } finally {
+    document.getElementById('searchBtn').disabled = false;
+    document.getElementById('loading').classList.remove('visible');
+  }
+}
   async function saveWeather() {
     if (!currentWeather) return;
     document.getElementById('saveBtn').disabled = true;
